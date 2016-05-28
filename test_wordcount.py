@@ -7,7 +7,7 @@ from pyspark.streaming import StreamingContext
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print "Error"
+        print ("Error")
         sys.exit(1)
 
     sc = SparkContext(appName="PythonStreamingNetworkWordCount")
