@@ -20,11 +20,13 @@ def analyze(grouping):
     group = grouping[1]
     for doc in group:
         print doc
+    return (None, doc)
 
 
 parsed = kafka_stream.map(lambda (k, v): json.loads(v))
 
-parsed.map(analyze)
+red = parsed.map(analyze)
+red.pprint()
 
 stream.start()
 stream.awaitTermination()
