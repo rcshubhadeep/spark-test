@@ -5,6 +5,7 @@ from pykafka import KafkaClient
 from config import get_kafka_connection_string
 
 import json
+import sys
 
 app = Flask(__name__)
 api = Api(app)
@@ -15,9 +16,11 @@ def connect_to_kafka():
     client = KafkaClient(hosts=connection_string)
     return client
 
-
-kafka_client = connect_to_kafka()
-topic = client.topics['MyTopic']
+try:
+    kafka_client = connect_to_kafka()
+    topic = kafka_client.topics['MyTopic']
+except:
+    sys.exit(1)
 
 
 class MessagePost(Resource):
