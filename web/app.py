@@ -25,6 +25,7 @@ class MessagePost(Resource):
         json_data = request.get_json(force=True)
         with topic.get_producer() as producer:
             producer.produce(json.dumps(json_data))
+        return "", 201
 
 api.add_resource(MessagePost, '/api/events')
 
