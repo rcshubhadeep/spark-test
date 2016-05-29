@@ -19,6 +19,7 @@ def connect_to_kafka():
 try:
     kafka_client = connect_to_kafka()
     topic = kafka_client.topics['MyTopic']
+    producer = topic.get_producer()
 except:
     sys.exit(1)
 
@@ -26,8 +27,7 @@ except:
 class MessagePost(Resource):
     def post(self):
         json_data = request.get_json(force=True)
-        with topic.get_producer() as producer:
-            producer.produce(json.dumps(json_data))
+        producer.produce(json.dumps(json_data))
         return "", 201
 
 api.add_resource(MessagePost, '/api/events')
