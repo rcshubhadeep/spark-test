@@ -16,11 +16,12 @@ kafka_stream = KafkaUtils.createStream(stream,
 
 
 def analyze(grouping):
-    group_key = grouping[0]
-    group = grouping[1]
-    for doc in group:
-        print doc
-    return (None, doc)
+    print grouping
+    # group_key = grouping[0]
+    # group = grouping[1]
+    # for doc in group:
+    #     print doc
+    return (None, grouping)
 
 
 parsed = kafka_stream.map(lambda (k, v): json.loads(v))
