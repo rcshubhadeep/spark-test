@@ -1,44 +1,30 @@
-from __future__ import print_function
-
-import sys
-
-from pyspark import SparkContext
+from pyspark.sql import SQLContext
+from pyspark import SparkContext, SparkConf
 from pyspark.streaming import StreamingContext
-from pyspark.sql import Row, SparkSession
+from pyspark.streaming.kafka import KafkaUtils
+
+import json
+
+sc = SparkContext()
+sql = SQLContext(sc)
+stream = StreamingContext(sc, 1)  # 1 second window
+
+kafka_stream = KafkaUtils.createStream(stream,
+                                       'localhost:2181',
+                                       'event_streaming_consumer',
+                                       {"MyTopic": 1})
 
 
-def getSparkSessionInstance(sparkConf):
-    if ('sparkSessionSingletonInstance' not in globals()):
-        globals()['sparkSessionSingletonInstance'] = SparkSession\
-            .builder\
-            .config(conf=sparkConf)\
-            .getOrCreate()
-    return globals()['sparkSessionSingletonInstance']
+def analyze(grouping):
+    group_key = grouping[0]
+    group = grouping[1]
+    for doc in group:
+        print doc
 
 
-if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print ("Error")
-        sys.exit(1)
+parsed = kafka_stream.map(lambda (k, v): json.loads(v))
 
-    host, port = sys.argv[1:]
-    sc = SparkContext(appName="PythonStreamingNetworkWordCount")
-    ssc = StreamingContext(sc, 1)
-    lines = ssc.socketTextStream(host, int(port))
-    words = lines.flatMap(lambda line: line.split(" "))
+parsed.map(analyze)
 
-    def process(time, rdd):
-        print("========= %s =========" % str(time))
-        try:
-            spark = getSparkSessionInstance(rdd.context.getConf())
-            rowRdd = rdd.map(lambda w: Row(word=w))
-            wordsDataFrame = spark.createDataFrame(rowRdd)
-            wordsDataFrame.createOrReplaceTempView("words")
-            wordCountsDataFrame = spark.sql("select word, count(*) as total from words group by word")
-            wordCountsDataFrame.show()
-        except:
-            pass
-
-    words.foreachRDD(process)
-    ssc.start()
-    ssc.awaitTermination()
+stream.start()
+stream.awaitTermination()
