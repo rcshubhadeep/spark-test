@@ -4,13 +4,21 @@ from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 
 import json
+import os
+
+
+def get_zookerper_connect_string():
+    host = os.getenv("ZOOKEEPER_HOST", "localhost")
+    port = os.getenv("ZOOKEEPER_PORT", "2181")
+    return host + ":" + port
+
 
 sc = SparkContext()
 sql = SQLContext(sc)
 stream = StreamingContext(sc, 1)  # 1 second window
 
 kafka_stream = KafkaUtils.createStream(stream,
-                                       'localhost:2181',
+                                       get_zookerper_connect_string(),
                                        'event_streaming_consumer',
                                        {"MyTopic": 1})
 
