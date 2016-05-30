@@ -16,14 +16,10 @@ kafka_stream = KafkaUtils.createStream(stream,
 
 
 def analyze(grouping):
-    print grouping
-    print type(grouping)
-    return (None, grouping)
-    # data_dict = grouping[1]
-    # if 'event_type' not in data_dict:
-    #     return (None, None)
-    #
-    # return (data_dict['event_type'], grouping)
+    if 'event_type' not in grouping:
+        return (None, None)
+
+    return (grouping['event_type'], grouping)
 
 
 parsed = kafka_stream.map(lambda (k, v): json.loads(v))
